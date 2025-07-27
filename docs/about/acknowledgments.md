@@ -6,14 +6,20 @@
 
 - **Orientador**  
   :material-account-tie:{ .lg .middle }  
-  **Dr. Nome do Orientador**  
+  **Prof. Dr. Everaldo Barreiros de Souza**  
   Cargo/Instituição
 
 - **Membro Externo**  
   :material-school:{ .lg .middle }  
-  **Prof. Nivaldo Silveira Ferreira**  
+  **Prof. Dr. Nivaldo Silveira Ferreira**  
   Doutor em Meteorologia  
   Universidade Estadual do Norte Fluminense - UENF
+
+ - **Membro Externo**  
+  :material-school:{ .lg .middle }  
+  **Prof. Dr. Nivaldo Silveira Ferreira**  
+  Doutor em Meteorologia  
+  Universidade Estadual do Norte Fluminense - UENF 
 
 </div>
 

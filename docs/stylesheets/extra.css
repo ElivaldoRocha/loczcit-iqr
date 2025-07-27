@@ -818,12 +818,12 @@ body {
 
 /* Forçar exibição específica para a logo */
 .md-typeset .text-center img[alt="FAMET Logo"] {
-    width: 300px; /* Adicione o tamanho aqui */
+    width: 500px; /* Adicione o tamanho aqui */
     height: auto;
-    border: 2px solid var(--accent-gold);
+    /*border: 2px solid var(--accent-gold);*/
     padding: 10px;
-    background: white;
-    box-shadow: var(--shadow-md);
+    /*background: rgba(255, 255, 255, 0);*/
+    /*box-shadow: var(--shadow-md);*/
     display: block !important; /* Force a imagem a ser um bloco para centralizar corretamente */
     margin: 0 auto; /* Centraliza a imagem se ela for um bloco */
 }

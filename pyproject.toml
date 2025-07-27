@@ -36,3 +36,18 @@ pygments = "^2.19.2"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "--doctest-modules"
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.taskipy.tasks]
+lint = "blue --check --diff . && isort --check --diff ."
+docs = "mkdocs build --clean && mkdocs serve"
+pre_test = "task lint"
+test = "pytest -s -x --cov=loczcit_iqr -VV"
+post_test = "coverage html"
