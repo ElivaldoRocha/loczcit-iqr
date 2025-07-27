@@ -1,0 +1,145 @@
+site_name: Loczcit-IQR
+site_description: >
+  Sistema Avançado de Localização Automática da Zona de Convergência Intertropical. 
+  Ferramenta científica inovadora desenvolvida na UFPA para análise meteorológica operacional.
+site_url: https://elivaldorocha.github.io/loczcit-iqr
+repo_url: https://github.com/ElivaldoRocha/loczcit-iqr
+repo_name: ElivaldoRocha/loczcit-iqr
+edit_uri: tree/main/docs
+site_author: Elivaldo Carvalho Rocha
+
+theme:
+  name: material
+  language: pt-BR
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Alternar para modo escuro
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Alternar para modo claro
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.tabs.link
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - content.tooltips
+    - toc.follow
+    - toc.integrate
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js
+
+plugins:
+  - search:
+      lang: 
+        - pt
+        - en
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: datetime
+      locale: pt_BR
+      fallback_to_build_date: true
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      baselevel: 1
+      separator: "-"
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ElivaldoRocha
+      name: GitHub do Desenvolvedor
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/loczcit-iqr
+      name: Pacote Python no PyPI
+    - icon: fontawesome/solid/graduation-cap
+      link: https://ufpa.br
+      name: Universidade Federal do Pará
+    - icon: fontawesome/solid/envelope
+      link: mailto:elivaldo.rocha@meteorologia.ufpa.br
+      name: Contato via Email
+
+nav:
+  - Home: index.md
+  - Começando:
+    - getting-started/installation.md
+    - getting-started/configuration.md
+  - Guias:
+    - guides/user-guide.md
+  - API:
+    - api/reference.md
+  - Sobre:
+    - about/changelog.md
+    - about/contributing.md
+    - about/license.md
+    - about/acknowledgments.md
+
+copyright: >
+  Copyright &copy; 2025 Elivaldo Carvalho Rocha - 
+  Universidade Federal do Pará
+
+site_dir: site
+docs_dir: docs
+use_directory_urls: true
+strict: false
