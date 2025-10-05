@@ -82,7 +82,7 @@ A ZCIT é um dos principais sistemas meteorológicos que influenciam o regime de
 
 ### Pré-requisitos
 
-- Python 3.13.5 (ou Python 3.9+)
+- Python 3.13.5 (ou Python 3.12+)
 - pip ou **UV** (recomendado - gerenciador ultra-rápido)
 - Sistema operacional: Windows, Linux ou macOS
 

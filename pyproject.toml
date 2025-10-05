@@ -25,7 +25,7 @@ description = "Location of the Main Axis of the Intertropical Convergence Zone b
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Elivaldo Rocha", email = "carvalhovaldo09@gmail.com" }]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "cartopy>=0.25.0",
     "cftime>=1.6.4.post1",
