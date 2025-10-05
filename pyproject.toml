@@ -180,3 +180,16 @@ where = ["src"]
 [tool.setuptools]
 # Mapeia o diretório raiz de pacotes para 'src'.
 package-dir = { "" = "src" }
+
+[tool.setuptools]
+# Esta opção garante que todos os arquivos especificados sejam incluídos
+include-package-data = true
+
+[tool.setuptools.packages.find]
+# Diz ao setuptools para procurar pacotes dentro da pasta 'src'
+where = ["src"]
+
+[tool.setuptools.package-data]
+# Inclui todos os arquivos dentro das pastas 'assets' e 'data'
+# que estão dentro do seu pacote 'loczcit_iqr'
+"loczcit_iqr" = ["assets/**/*", "data/**/*"]
