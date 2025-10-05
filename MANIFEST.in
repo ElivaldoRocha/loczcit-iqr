@@ -1,0 +1,5 @@
+# Inclui todos os arquivos da pasta 'assets' e suas subpastas
+recursive-include src/assets *
+
+# Inclui todos os arquivos da pasta 'data' e suas subpastas
+recursive-include src/data *

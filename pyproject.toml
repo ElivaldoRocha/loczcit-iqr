@@ -182,7 +182,3 @@ where = ["src"]
 include-package-data = true
 # Mapeia o diretório raiz de pacotes para 'src'.
 package-dir = { "" = "src" }
-
-[tool.setuptools.package-data]
-# Inclui todos os arquivos de dados e assets no pacote final.
-"loczcit_iqr" = ["assets/**/*", "data/**/*"]
