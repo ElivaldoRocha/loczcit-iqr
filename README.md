@@ -115,7 +115,7 @@ uv pip install -e .
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/seu-usuario/loczcit-iqr.git
+git clone https://github.com/ElivaldoRocha/loczcit-iqr.git
 cd loczcit-iqr
 
 # Criar ambiente virtual
@@ -211,52 +211,173 @@ Você deve ver uma saída indicando que todos os módulos core estão disponíve
 
 ```python
 import loczcit_iqr as lz
+import matplotlib.pyplot as plt
 
-# Verificar instalação
-lz.check_modules()
+# --- 1. Configuração e Carregamento ---
 
-# Carregar dados NOAA OLR
+# Importa todas as classes e funções necessárias
 from loczcit_iqr.core.data_loader import NOAADataLoader
-
-loader = NOAADataLoader()
-olr_data = loader.load_data(
-    start_date="2024-01-01",
-    end_date="2024-12-31"
-)
-
-# Processar dados em pentadas
 from loczcit_iqr.core.processor import DataProcessor
-
-processor = DataProcessor(use_dask=True, n_workers=4)
-pentads = processor.create_pentads(olr_data, year=2024)
-
-# Encontrar coordenadas da ZCIT
-coords = processor.find_minimum_coordinates(pentads['olr'])
-
-# Detectar e remover outliers
 from loczcit_iqr.core.iqr_detector import IQRDetector
+from loczcit_iqr.core.spline_interpolator import SplineInterpolator, SplineParameters, InterpolationMethod
+from loczcit_iqr.plotting.visualizer import ZCITVisualizer
+from loczcit_iqr.utils import pentada_to_dates
 
-detector = IQRDetector()
-coords_validos, coords_outliers = detector.detect_and_filter(coords)
+# Define o ano e a pêntada para a análise
+ANO_ALVO = 2022
+PENTADA_ALVO = 29
 
-# Interpolar linha da ZCIT
-from loczcit_iqr.core.spline_interpolator import SplineInterpolator
+# Carrega os dados de OLR para o ano inteiro
+print(f"Carregando dados de OLR para {ANO_ALVO}...")
+loader = NOAADataLoader()
+olr_data = loader.load_data(start_date=f"{ANO_ALVO}-01-01", end_date=f"{ANO_ALVO}-12-31")
 
-interpolator = SplineInterpolator()
-linha_zcit, stats = interpolator.interpolate(
-    coords_validos,
-    method='bspline',
-    smooth_factor='auto'
+# Cria as 73 pêntadas para o ano
+print("Processando dados em pêntadas...")
+processor = DataProcessor()
+pentads_year = processor.create_pentads(olr_data=olr_data, year=ANO_ALVO)
+
+# --- 2. Análise Detalhada da ZCIT ---
+
+print(f"Iniciando análise para a pêntada {PENTADA_ALVO}...")
+
+# Seleciona os dados 2D da pêntada de interesse
+olr_pentada = pentads_year['olr'].sel(pentada=PENTADA_ALVO)
+
+# Encontra os pontos principais da ZCIT (mínimos por coluna)
+min_coords = processor.find_minimum_coordinates(
+    olr_pentada,
+    method='column_minimum'
 )
 
-# Visualizar resultado
-from loczcit_iqr.plotting.visualizer import plot_zcit_quick
+# Detecta outliers com o método IQR
+detector = IQRDetector(constant=0.75)
+coords_validos, coords_outliers, _ = detector.detect_outliers(min_coords)
 
-fig = plot_zcit_quick(pentads['olr'], pentada=10, year=2024)
+# Encontra outros sistemas convectivos isolados (mínimos locais)
+sistemas_convectivos = processor.find_minimum_coordinates(
+    olr_pentada,
+    threshold=230,
+    method='local_minimum'
+)
+
+# Configura os parâmetros para a interpolação B-spline
+params_bspline = SplineParameters(
+    method=InterpolationMethod.BSPLINE,
+    smooth_factor='high',
+    degree=3,
+    num_points_output=100
+)
+
+# Interpola a linha da ZCIT usando apenas os pontos válidos
+interpolator = SplineInterpolator()
+zcit_line, _ = interpolator.interpolate(coords_validos, parameters=params_bspline)
+
+# --- 3. Visualização Completa ---
+
+print("Gerando visualização completa...")
+
+# Cria um título dinâmico com o período exato da pêntada
+start_date, end_date = pentada_to_dates(PENTADA_ALVO, ANO_ALVO)
+titulo_customizado = (
+    f"Análise ZCIT - Pentada {PENTADA_ALVO} "
+    f"({start_date.strftime('%d/%m')} - {end_date.strftime('%d/%m/%Y')})"
+)
+
+# Inicializa o visualizador com um template profissional
+viz = ZCITVisualizer(template='publication')
+
+# Plota a análise completa com todos os elementos
+fig, ax = viz.plot_complete_analysis(
+    olr_data=olr_pentada,
+    title=titulo_customizado,
+    coords_valid=coords_validos,
+    coords_outliers=coords_outliers,
+    sistemas_convectivos=sistemas_convectivos,
+    zcit_line=zcit_line,
+    study_area_visible=True
+)
+
+plt.show()
+```
+
+### Monitoramento Pelo Último Período Disponível no Servidor da NOAA: últimos 5 dias no dataset.
+```python
+import pandas as pd
+import os
+
+from loczcit_iqr.core.data_loader import NOAADataLoader
+from loczcit_iqr.core.processor import DataProcessor
+from loczcit_iqr.core.iqr_detector import IQRDetector
+from loczcit_iqr.core.spline_interpolator import SplineInterpolator, SplineParameters, InterpolationMethod
+from loczcit_iqr.plotting.visualizer import *
+
+# =============================================================================
+# 1. CARREGAMENTO E PROCESSAMENTO
+# =============================================================================
+ano = 2025
+loader = NOAADataLoader()
+processor = DataProcessor()
+print(f"Carregando dados diários para {ano}...")
+olr_data = loader.load_data(start_date=f"{ano}-01-01", end_date=f"{ano}-12-31")
+print("\nCalculando a média de OLR para o período mais recente...")
+olr_recente = processor.process_latest_period(olr_data, num_days=5)
+print("Média recente calculada com sucesso.")
+
+# =============================================================================
+# 2. ANÁLISE DA ZCIT
+# =============================================================================
+print(f"\nIniciando análise para o período recente...")
+detector = IQRDetector()
+interpolator = SplineInterpolator()
+min_coords = processor.find_minimum_coordinates(
+    data_array=olr_recente, method='column_minimum', search_radius=1
+)
+coords_valid, coords_outliers, resumo = detector.detect_outliers(min_coords)
+sistemas_convectivos = processor.find_minimum_coordinates(
+    data_array=olr_recente, threshold=230, method='local_minimum', search_radius=2
+)
+params_bspline = SplineParameters(
+    method=InterpolationMethod.BSPLINE, smooth_factor='high', degree=3, 
+    num_points_output=100, extrapolate_flag=True, reference_latitude=0
+)
+zcit_line, _ = interpolator.interpolate(coords_valid, parameters=params_bspline)
+print("Análise concluída.")
+
+# =============================================================================
+# 3. VISUALIZAÇÃO
+# =============================================================================
+
+# --- Preparar o título ---
+start_str = olr_recente.attrs['period_start']
+end_str = olr_recente.attrs['period_end']
+start_date_title = pd.to_datetime(start_str)
+end_date_title = pd.to_datetime(end_str)
+titulo_customizado = (
+    f"Análise ZCIT - Média de 5 dias "
+    f"({start_date_title.strftime('%d/%m')} - {end_date_title.strftime('%d/%m/%Y')})"
+)
+
+# --- Chamar o método "mestre" ---
+viz = ZCITVisualizer(template='publication')
+fig, ax = viz.plot_complete_analysis(
+    olr_data=olr_recente,
+    title=titulo_customizado,
+    coords_valid=coords_valid,
+    coords_outliers=coords_outliers,
+    sistemas_convectivos=sistemas_convectivos,
+    zcit_line=zcit_line,
+    study_area_visible=True,
+    save_path=None # ou 'minha_figura.png' para salvar
+)
+
+# --- Mostrar o Gráfico ---
+plt.show()
+
 ```
 
 ### Análise Climatológica
-
+⚠️ Ainda não utilizar o módulo de climatologia, ainda em desenvolvimento ⚠️
 ```python
 from loczcit_iqr.utils.climatologia import (
     climatologia_nordeste_brasileiro,
@@ -359,7 +480,7 @@ Acesse a documentação completa em: [https://loczcit-iqr.readthedocs.io](https:
 
 ### Notebooks de Exemplo
 
-Explore os notebooks Jupyter na pasta `examples/`:
+Explore os notebooks Jupyter na pasta `notebooks/`:
 - `data_loader.ipynb` - Carregamento de dados NOAA
 - `processor_and_Interpolator.ipynb` - Processamento de pentadas, Detecção de outliers e Interpolação avançada
 - `work_flow.ipynb` - Exemplo sugerido de fluxo de trabalho
@@ -465,7 +586,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 📞 Contato & Suporte
 
-- 💬 **Issues**: [GitHub Issues](https://github.com/seu-usuario/loczcit-iqr/issues)
+- 💬 **Issues**: [GitHub Issues](https://github.com/ElivaldoRocha/loczcit-iqr/issues)
 - 📧 **Email**: carvalhovaldo09@gmail.com
 - 📖 **Documentação**: [ReadTheDocs](https://loczcit-iqr.readthedocs.io)
 
