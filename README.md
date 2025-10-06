@@ -426,36 +426,55 @@ Geração do eixo central da ZCIT com metadados e estatísticas de qualidade
 ## 🗂️ Estrutura do Projeto
 
 ```
-loczcit-iqr/
+main/
+│
+├── docs/
+│   └── ... (Documentação, TCC, etc.)
+│
+├── examples/
+│   └── run_analysis.py
+│
+├── notebooks/
+│   └── Loczcit_IQR_in_Google_Colab.ipynb
+│   └── ... (Outros notebooks de exemplo)
 │
 ├── src/
-│   ├── loczcit_iqr/
-│   │   ├── __init__.py
-│   │   ├── core/
-│   │   │   ├── data_loader.py       # Download e carregamento de dados
-│   │   │   ├── processor.py         # Processamento de pentadas
-│   │   │   ├── iqr_detector.py      # Detecção de outliers
-│   │   │   └── spline_interpolator.py  # Interpolação matemática
-│   │   │
-│   │   ├── plotting/
-│   │   │   └── visualizer.py        # Visualização e mapas
-│   │   │
-│   │   └── utils/
-│   │       ├── pentadas.py      # Conversão e manipulação de pentadas
-│   │       └── validators.py    # Funções de validação 
+│   ├── assets/
+│   │   ├── fonts/
+│   │   └── img/
 │   │
 │   ├── data/
-│   │   └── shapefiles/              # Arquivos de área de estudo
+│   │   ├── netcdf/ # <- Algumas climatologias já processadas
+│   │   └── shapefiles/
+│   │       └── Area_LOCZCIT.parquet
+│   │       └── ...
 │   │
-│   └── assets/
-│       └── img/
-│           └── logo_Oficial.png     # Logo do projeto
+│   └── loczcit_iqr/ # <- Módulos da biblioteca
+│       ├── __init__.py
+│       │
+│       ├── core/
+│       │   ├── __init__.py
+│       │   ├── climatologia.py
+│       │   ├── data_loader.py
+│       │   ├── iqr_detector.py
+│       │   ├── processor.py
+│       │   └── spline_interpolator.py
+│       │
+│       ├── plotting/
+│       │   ├── __init__.py
+│       │   ├── style.py
+│       │   └── visualizer.py
+│       │
+│       └── utils/
+│           ├── __init__.py
+│           ├── pentadas.py
+│           └── validators.py
 │
-├── notebooks/                        # Exemplos de uso
-├── docs/                             # TCC e Documentação completa
-├── README.md
+├── .gitignore
 ├── LICENSE
-└── setup.py
+├── MANIFEST.in
+├── pyproject.toml
+└── README.md
 ```
 
 ---
