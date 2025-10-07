@@ -4,6 +4,38 @@
   <img src="src/assets/img/logo_Oficial.png" alt="LOCZCIT-IQR Logo" width="300"/>
 </div>
 
+---
+
+> [!CAUTION]
+> ## 🚨 AVISO IMPORTANTE 🚨
+> ### Paralisação do Governo dos EUA - Impacto nos Dados NOAA
+>
+> **⏸️ Status Atual (Outubro 2025)**
+>
+> Os servidores da NOAA estão **temporariamente offline** devido à paralisação do governo 
+> federal dos EUA. Dados de OLR não estão sendo atualizados desde 07/09/2025.
+>
+> <div align="center">
+>
+> | Status | Funcionalidade |
+> |:------:|:--------------|
+> | ✅ | **Dados históricos** (1979 - 07/09/2025) acessíveis |
+> | ⚠️ | **Dados novos** - atualizações diárias indisponíveis temporariamente |
+> | 🚧 | **Integração ERA5** em desenvolvimento |
+>
+> </div>
+>
+> **🛠️ O que estamos fazendo:**
+>
+> Estamos implementando suporte ao **ERA5 (Copernicus Climate Data Store)** como 
+> fonte alternativa de dados de OLR. Esta fonte é:
+> - ✅ Independente do governo dos EUA
+> - ✅ Atualizada continuamente
+> - ✅ Alta resolução espacial (0.25° vs 2.5° da NOAA)
+> - ✅ Gratuita e amplemente validada cientificamente
+
+---
+
 # LOCZCIT-IQR
 
 ### **LOCalização da Zona de Convergência InterTropical - Interquartile Range**
