@@ -5,8 +5,6 @@
 </div>
 
 ---
-
-> [!CAUTION]
 > ## 🚨 AVISO IMPORTANTE 🚨
 > ### Paralisação do Governo dos EUA - Impacto nos Dados NOAA
 >
@@ -33,7 +31,6 @@
 > - ✅ Atualizada continuamente
 > - ✅ Alta resolução espacial (0.25° vs 2.5° da NOAA)
 > - ✅ Gratuita e amplemente validada cientificamente
-
 ---
 
 # LOCZCIT-IQR
