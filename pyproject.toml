@@ -28,6 +28,7 @@ authors = [{ name = "Elivaldo Rocha", email = "carvalhovaldo09@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = [
     "cartopy>=0.25.0",
+    "cdsapi",
     "cftime>=1.6.4.post1",
     "dask>=2025.9.1",
     "geopandas>=1.1.1",
