@@ -199,4 +199,6 @@ cython_debug/
 
 # Cache em notebooks
 notebooks/data_cache/
+notebooks/era5_cache/
 notebooks/data_loader_files/
+notebooks/data_loader_era5_files/

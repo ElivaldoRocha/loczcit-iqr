@@ -1400,23 +1400,75 @@ class ZCITVisualizer:
 
     def add_credits(
         self,
-        text: str = "\nSource: NOAA HIRS L1B, Gridsat CDR",
+        source: str = "NOAA",  # "NOAA" ou "ERA5"
+        custom_text: str | None = None,
         location: tuple[float, float] = (0.99, 0.01),
+        fontsize: int = 12,
+        color: str = "white",
+        **kwargs,
     ):
-        """Adiciona créditos no canto da figura."""
+        """
+        Adiciona créditos no canto da figura com suporte para múltiplas fontes.
+
+        Parameters
+        ----------
+        source : str
+            Fonte de dados: "NOAA" ou "ERA5"
+        custom_text : str, optional
+            Texto customizado (sobrescreve o padrão)
+        location : tuple
+            Posição do texto (x, y) em coordenadas normalizadas
+        fontsize : int
+            Tamanho da fonte
+        color : str
+            Cor do texto
+        **kwargs
+            Argumentos adicionais para ax.text
+
+        Examples
+        --------
+        >>> viz.add_credits(source="NOAA")
+        >>> viz.add_credits(source="ERA5")
+        >>> viz.add_credits(custom_text="Fonte: Dados Customizados")
+        """
+        # Textos predefinidos para cada fonte
+        CREDIT_TEXTS = {
+            "NOAA": "\nSource: NOAA HIRS L1B, Gridsat CDR",
+            "ERA5": "\nSource: ERA5 Reanalysis, ECMWF",
+        }
+
         try:
-            self.ax.text(
-                location[0],
-                location[1],
-                text,
-                transform=self.ax.transAxes,
-                fontsize=12,
-                color="white",
-                fontweight="bold",
-                fontstyle="italic",
-                ha="right",
-                va="bottom",
-            )
+            # Determinar o texto a ser usado
+            if custom_text:
+                text = custom_text
+            else:
+                source_upper = source.upper()
+                if source_upper not in CREDIT_TEXTS:
+                    logger.warning(
+                        f"Fonte '{source}' não reconhecida. Usando 'NOAA' como padrão."
+                    )
+                    source_upper = "NOAA"
+                text = CREDIT_TEXTS[source_upper]
+
+            # Configurações padrão
+            text_config = {
+                "transform": self.ax.transAxes,
+                "fontsize": fontsize,
+                "color": color,
+                "fontweight": "bold",
+                "fontstyle": "italic",
+                "ha": "right",
+                "va": "bottom",
+            }
+
+            # Atualizar com kwargs
+            text_config.update(kwargs)
+
+            # Adicionar o texto
+            self.ax.text(location[0], location[1], text, **text_config)
+
+            logger.info(f"Créditos adicionados: {text.strip()}")
+
         except Exception as e:
             logger.warning(f"Não foi possível adicionar os créditos: {e}")
 
@@ -1755,14 +1807,11 @@ class ZCITVisualizer:
         sistemas_convectivos: list | None = None,
         zcit_line: LineString | None = None,
         study_area_visible: bool = True,
+        credits: str = "NOAA",
         save_path: str | None = None,
     ) -> tuple[plt.Figure, plt.Axes]:
         """
         Cria uma visualização completa da análise ZCIT com todos os elementos.
-
-        Este método funciona como um "diretor de orquestra", chamando cada
-        instrumento (método de plotagem) na ordem correta para criar a
-        sinfonia visual final.
 
         Parameters
         ----------
@@ -1780,6 +1829,8 @@ class ZCITVisualizer:
             A linha interpolada da ZCIT.
         study_area_visible : bool, default True
             Se True, plota a área de estudo padrão.
+        credits : str, default "NOAA"
+            Fonte de dados: "NOAA", "ERA5" ou texto customizado
         save_path : str, optional
             Se fornecido, salva a figura no caminho especificado.
 
@@ -1787,6 +1838,25 @@ class ZCITVisualizer:
         -------
         tuple[plt.Figure, plt.Axes]
             A figura e os eixos do Matplotlib gerados.
+
+        Examples
+        --------
+        >>> # Usando dados NOAA (padrão)
+        >>> viz.plot_complete_analysis(olr_data, title="Análise ZCIT")
+
+        >>> # Usando dados ERA5
+        >>> viz.plot_complete_analysis(
+        ...     olr_data,
+        ...     title="Análise ZCIT",
+        ...     credits="ERA5"
+        ... )
+
+        >>> # Usando texto customizado
+        >>> viz.plot_complete_analysis(
+        ...     olr_data,
+        ...     title="Análise ZCIT",
+        ...     credits="Fonte: Meus Dados Customizados"
+        ... )
         """
         print("\nIniciando a criação da visualização completa...")
 
@@ -1843,11 +1913,14 @@ class ZCITVisualizer:
         )
         self.ax.set_title(title, fontsize=16, fontweight="bold", pad=15)
 
-        # Adicionar todos os elementos decorativos
+        # Adicionar elementos decorativos
         self.add_legend(
             loc="lower left", title="Legenda", fontsize=9, framealpha=1, ncol=1
         )
-        self.add_credits()
+
+        # <-- MUDANÇA AQUI: Usar o novo parâmetro credits
+        self.add_credits(source=credits)
+
         self.add_logo(loc_geo=(-5, 13), zoom=0.1, alpha=0.8)
         self.add_north_arrow(loc_geo=(-73.5, 0.4), zoom=0.1, alpha=1, zorder=12)
         self.add_scale_bar(
@@ -2558,6 +2631,7 @@ def plot_complete_zcit_analysis(
     xlims: tuple[float, float] = (-80, 0),
     ylims: tuple[float, float] = (-12, 17),
     colormap: str = "classic",
+    credits: str = "NOAA",  # "NOAA" ou "ERA5"
     save_path: str | None = None,
     **kwargs,
 ) -> tuple[plt.Figure, plt.Axes]:
@@ -2601,6 +2675,8 @@ def plot_complete_zcit_analysis(
         Limites do eixo Y (latitude)
     colormap : str
         Nome do colormap a usar
+    credits : str, default "NOAA"
+        Fonte de dados para os créditos: "NOAA", "ERA5" ou texto customizado
     save_path : str, optional
         Caminho para salvar a figura
     **kwargs
@@ -2871,7 +2947,7 @@ def plot_complete_zcit_analysis(
     )
 
     # Créditos
-    viz.add_credits()
+    viz.add_credits(source=credits)
 
     # Logo
     viz.add_logo(

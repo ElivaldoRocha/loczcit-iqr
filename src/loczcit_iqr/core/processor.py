@@ -591,13 +591,42 @@ class DataProcessor:
         min_days_required: int,
         remove_leap_days: bool,
     ) -> xr.Dataset:
-        """Adiciona metadados e coordenadas temporais ao dataset de pentadas."""
+        """
+        Adiciona metadados e coordenadas temporais ao dataset de pentadas.
+
+        COMPATÍVEL COM:
+        - pentada_to_dates() retornando datetime.datetime
+        - pentada_to_dates() retornando cftime (futuro)
+        """
         # Adicionar coordenada de tempo representativa
         time_coords = []
         for pentad_num in pentad_dataset.pentada.values:
             start_date, end_date = pentada_to_dates(pentad_num, year)
             center_date = start_date + (end_date - start_date) / 2
-            time_coords.append(np.datetime64(center_date, "us"))
+
+            # ================================================================
+            # CONVERSÃO ROBUSTA - COMPATÍVEL COM datetime E cftime
+            # ================================================================
+            try:
+                # Método 1: Conversão direta via pandas (funciona com datetime)
+                center_timestamp = pd.Timestamp(center_date)
+            except (ValueError, TypeError):
+                # Método 2: Fallback para cftime ou outros tipos
+                if hasattr(center_date, "year"):
+                    center_timestamp = pd.Timestamp(
+                        year=center_date.year,
+                        month=center_date.month,
+                        day=center_date.day,
+                        hour=getattr(center_date, "hour", 12),
+                        minute=getattr(center_date, "minute", 0),
+                    )
+                else:
+                    raise RuntimeError(
+                        f"Não foi possível converter data da pentada. "
+                        f"Tipo: {type(center_date)}"
+                    )
+
+            time_coords.append(np.datetime64(center_timestamp, "us"))
 
         pentad_dataset = pentad_dataset.assign_coords(time=("pentada", time_coords))
 
@@ -715,21 +744,49 @@ class DataProcessor:
         """
         Calcula a média dos últimos 'num_days' disponíveis no dataset.
 
-        Como um "boletim de última hora" que analisa os dados mais recentes.
+        COMPATÍVEL COM:
+        - ERA5 (datetime64[ns])
+        - NOAA (cftime.DatetimeGregorian)
         """
         if "time" not in olr_data.coords or len(olr_data.time) == 0:
             raise ValueError("Dataset inválido ou sem coordenada de tempo.")
 
-        # --- LÓGICA DE CONVERSÃO DE DATA CORRIGIDA ---
-        # Encontra a última data, que é um objeto cftime
-        cftime_obj = olr_data.time.max().values.item()
+        # ================================================================
+        # CONVERSÃO ROBUSTA DE DATA - COMPATÍVEL COM ERA5 E NOAA
+        # ================================================================
 
-        # Constrói um Timestamp do pandas de forma manual e robusta
-        latest_date = pd.Timestamp(
-            year=cftime_obj.year, month=cftime_obj.month, day=cftime_obj.day
-        )
-        # ----------------------------------------------
+        max_time_value = olr_data.time.max().values
 
+        try:
+            # Método 1: Conversão direta via pandas
+            latest_date = pd.Timestamp(max_time_value)
+
+            if not all(hasattr(latest_date, attr) for attr in ["year", "month", "day"]):
+                raise ValueError("Timestamp não tem atributos de data")
+
+        except (ValueError, TypeError) as e:
+            # Método 2: Fallback para tipos especiais
+            try:
+                if isinstance(max_time_value, np.datetime64):
+                    latest_date = pd.to_datetime(max_time_value)
+                elif hasattr(max_time_value, "year"):
+                    latest_date = pd.Timestamp(
+                        year=max_time_value.year,
+                        month=max_time_value.month,
+                        day=max_time_value.day,
+                    )
+                else:
+                    raise ValueError(
+                        f"Tipo de tempo não suportado: {type(max_time_value)}"
+                    )
+            except Exception as e2:
+                raise RuntimeError(
+                    f"Não foi possível converter coordenada temporal. "
+                    f"Tipo: {type(max_time_value)}, Erro original: {e}, "
+                    f"Erro fallback: {e2}"
+                )
+
+        # Calcular data inicial
         start_date = latest_date - pd.Timedelta(days=num_days - 1)
 
         logger.info(
@@ -737,7 +794,6 @@ class DataProcessor:
             f"{start_date.strftime('%Y-%m-%d')} a {latest_date.strftime('%Y-%m-%d')}"
         )
 
-        # Reutiliza o método existente que já funciona bem
         return self.create_recent_average(
             olr_data=olr_data,
             start_date=start_date.strftime("%Y-%m-%d"),
