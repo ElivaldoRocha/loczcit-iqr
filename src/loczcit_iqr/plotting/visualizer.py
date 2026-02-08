@@ -1400,7 +1400,7 @@ class ZCITVisualizer:
 
     def add_credits(
         self,
-        source: str = "NOAA",  # "NOAA" ou "ERA5"
+        source: str = "NOAA",  # "NOAA", "ERA5" ou "ECMWF"
         custom_text: str | None = None,
         location: tuple[float, float] = (0.99, 0.01),
         fontsize: int = 12,
@@ -1413,7 +1413,7 @@ class ZCITVisualizer:
         Parameters
         ----------
         source : str
-            Fonte de dados: "NOAA" ou "ERA5"
+            Fonte de dados: "NOAA", "ERA5" ou "ECMWF"
         custom_text : str, optional
             Texto customizado (sobrescreve o padrão)
         location : tuple
@@ -1424,17 +1424,13 @@ class ZCITVisualizer:
             Cor do texto
         **kwargs
             Argumentos adicionais para ax.text
-
-        Examples
-        --------
-        >>> viz.add_credits(source="NOAA")
-        >>> viz.add_credits(source="ERA5")
-        >>> viz.add_credits(custom_text="Fonte: Dados Customizados")
         """
         # Textos predefinidos para cada fonte
         CREDIT_TEXTS = {
             "NOAA": "\nSource: NOAA HIRS L1B, Gridsat CDR",
             "ERA5": "\nSource: ERA5 Reanalysis, ECMWF",
+            "ECMWF": "\nSource: ECMWF IFS Operational Forecast",
+            "ECMWF IFS FORECAST": "\nSource: ECMWF IFS Operational Forecast",  # Suporte para o nome completo usado no seu script
         }
 
         try:
@@ -1443,12 +1439,19 @@ class ZCITVisualizer:
                 text = custom_text
             else:
                 source_upper = source.upper()
-                if source_upper not in CREDIT_TEXTS:
+
+                # Verificação flexível: se "ECMWF" estiver na string, usa a legenda do ECMWF
+                if "ECMWF" in source_upper and source_upper not in CREDIT_TEXTS:
+                    source_key = "ECMWF"
+                elif source_upper in CREDIT_TEXTS:
+                    source_key = source_upper
+                else:
                     logger.warning(
                         f"Fonte '{source}' não reconhecida. Usando 'NOAA' como padrão."
                     )
-                    source_upper = "NOAA"
-                text = CREDIT_TEXTS[source_upper]
+                    source_key = "NOAA"
+
+                text = CREDIT_TEXTS[source_key]
 
             # Configurações padrão
             text_config = {

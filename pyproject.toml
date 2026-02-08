@@ -59,6 +59,11 @@ Homepage = "https://github.com/ElivaldoRocha"
 
 [project.optional-dependencies]
 dev = ["ruff", "pyright", "pytest", "pytest-xdist"]
+# Dependências para módulo de previsão ECMWF
+forecast = [
+    "ecmwf-opendata>=0.4.0",
+    "cfgrib>=0.9.14",
+]
 
 [project.scripts]
 # Define os comandos de console. A chave ('loczcit_iqr') é o comando.
